@@ -77,6 +77,10 @@ jobs:
       - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
       - run:
+          name: Install Serverless CLI
+          command: |
+            sudo npm i -g serverless
+      - run:
           name: Prepare serverless.yaml
           command: |
             echo "provider:" >> ./serverless.yaml
