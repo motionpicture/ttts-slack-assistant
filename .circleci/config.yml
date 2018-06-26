@@ -74,6 +74,8 @@ jobs:
       # - run:
       #     name: Set NPM_TOKEN
       #     command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ./.npmrc
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
       - run:
           name: Prepare serverless.yaml
           command: |
