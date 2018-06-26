@@ -17,6 +17,15 @@ service: ttts-slack-assistant
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
 
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: ap-northeast-1
+  environment:
+    SLACK_ACCESS_TOKEN: ${env:SLACK_ACCESS_TOKEN_DEVELOPMENT}
+    SLACK_VERIFICATION_TOKEN: ${env:SLACK_VERIFICATION_TOKEN_DEVELOPMENT}
+
 # you can add packaging information here
 #package:
 #  include:
@@ -79,15 +88,6 @@ functions:
 #     NewOutput:
 #       Description: "Description for the output"
 #       Value: "Some output value"
-
-# provider:
-#   name: aws
-#   runtime: nodejs8.10
-#   stage: dev
-#   region: ap-northeast-1
-#   environment:
-#     SLACK_ACCESS_TOKEN: xxx
-#     SLACK_VERIFICATION_TOKEN: xxx
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
