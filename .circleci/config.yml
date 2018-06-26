@@ -1,0 +1,114 @@
+version: 2
+jobs:
+  build:
+    # The primary container is an instance of the first list image listed. Your build commands run in this container.
+    docker:
+      - image: circleci/node:8.10
+    steps:
+      - checkout
+      - run:
+          name: node version
+          command: node -v
+      - run:
+          name: npm version
+          command: npm -v
+      # - run:
+      #     name: Update npm
+      #     command: 'sudo npm install -g npm@latest'
+      # - run:
+      #     name: configure npm for private modules
+      #     command: |
+      #       npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN
+      #       npm whoami
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: Install Serverless CLI and dependencies
+          command: |
+            sudo npm i -g serverless
+            npm install
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          name: compile typescript
+          command: npm run build
+  test:
+    docker:
+      - image: circleci/node:8.10
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: run npm test
+          command: npm test
+      # - run:
+      #     name: Generate code coverage
+      #     command: './node_modules/.bin/nyc report --reporter=text-lcov'
+      # - store_artifacts:
+      #     path: test-results.xml
+      #     prefix: tests
+      # - store_artifacts:
+      #     path: coverage
+      #     prefix: coverage
+  doc:
+    docker:
+      - image: circleci/node:8.10
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: Generate docs
+          command: |
+            npm run build
+            npm run doc
+  deploy2development:
+    # docker:
+    #   - image: google/cloud-sdk
+    steps:
+      - checkout
+      # - run:
+      #     name: Set NPM_TOKEN
+      #     command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ./.npmrc
+      - run:
+          name: Prepare serverless.yaml
+          command: |
+            echo "provider:" >> ./serverless.yaml
+            echo "  name: aws" >> ./serverless.yaml
+            echo "  runtime: nodejs8.10" >> ./serverless.yaml
+            echo "  stage: dev" >> ./serverless.yaml
+            echo "  region: ap-northeast-1" >> ./serverless.yaml
+            echo "  environment: " >> ./serverless.yaml
+            echo "    SLACK_ACCESS_TOKEN: '${SLACK_ACCESS_TOKEN}'" >> ./serverless.yaml
+            echo "    SLACK_VERIFICATION_TOKEN: '${SLACK_VERIFICATION_TOKEN}'" >> ./serverless.yaml
+      - run:
+          name: Deploy application
+          command: serverless deploy --stage dev
+# Used for orchestrating all jobs.
+workflows:
+  version: 2
+
+  build-test-doc-deploy:
+    jobs:
+      - build
+      # - test:
+      #     requires:
+      #       - build
+      # - doc:
+      #     requires:
+      #       - test
+      - deploy2development:
+          requires:
+            - build
+          filters:
+            branches:
+              only: develop
+      # - deploy:
+      #     requires:
+      #       - doc
+      #     filters:
+      #       branches:
+      #         only: master
