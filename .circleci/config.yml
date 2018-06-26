@@ -81,17 +81,6 @@ jobs:
           command: |
             sudo npm i -g serverless
       - run:
-          name: Prepare serverless.yaml
-          command: |
-            echo "provider:" >> ./serverless.yaml
-            echo "  name: aws" >> ./serverless.yaml
-            echo "  runtime: nodejs8.10" >> ./serverless.yaml
-            echo "  stage: dev" >> ./serverless.yaml
-            echo "  region: ap-northeast-1" >> ./serverless.yaml
-            echo "  environment: " >> ./serverless.yaml
-            echo "    SLACK_ACCESS_TOKEN: '${SLACK_ACCESS_TOKEN}'" >> ./serverless.yaml
-            echo "    SLACK_VERIFICATION_TOKEN: '${SLACK_VERIFICATION_TOKEN}'" >> ./serverless.yaml
-      - run:
           name: Deploy application
           command: serverless deploy --stage dev
 # Used for orchestrating all jobs.
