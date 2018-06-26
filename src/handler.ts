@@ -1,8 +1,10 @@
 import * as lambda from 'aws-lambda';
 import { WebClient } from '@slack/client';
 
-const VERIFICATION_TOKEN = process.env.SLACK_VERIFICATION_TOKEN;
-const ACCESS_TOKEN = process.env.SLACK_ACCESS_TOKEN;
+const VERIFICATION_TOKEN = <string>process.env.SLACK_VERIFICATION_TOKEN;
+const ACCESS_TOKEN = <string>process.env.SLACK_ACCESS_TOKEN;
+const PRIMARY_CHANNEL = <string>process.env.PRIMARY_CHANNEL;
+const SECONDARY_CHANNEL = <string>process.env.SECONDARY_CHANNEL;
 const slackWeb = new WebClient(ACCESS_TOKEN);
 
 const HOSHIDA_SAYINGS_COLLECTION = [
@@ -33,23 +35,61 @@ async function handleEvent(event: any, callback: lambda.Callback) {
     // test the message for a match and not a bot
     // if (!event.bot_id && /(aws|lambda)/ig.test(event.text)) {
     if (event.bot_id === undefined) {
-        // const text = `<@${event.user}> isn't AWS Lambda awesome?`;
-        const text = `<@${event.user}> ${HOSHIDA_SAYINGS_COLLECTION[Math.floor(Math.random() * HOSHIDA_SAYINGS_COLLECTION.length)]}`;
-        await slackWeb.chat.postMessage({
-            channel: event.channel,
-            text: text
-        });
-        // await request.post({
-        //     url: 'https://slack.com/api/chat.postMessage',
-        //     auth: { bearer: ACCESS_TOKEN },
-        //     json: true,
-        //     simple: false,
-        //     resolveWithFullResponse: true,
-        //     body: {
-        //         channel: event.channel,
-        //         text: text
-        //     }
-        // });
+        console.log('event handled:', event);
+
+        switch (event.type) {
+            case 'message':
+                // 一時問い合わせを受け付けるチャンネルにはメッセージ応答
+                if (event.channel === PRIMARY_CHANNEL) {
+                    // const text = `<@${event.user}> isn't AWS Lambda awesome?`;
+                    const text = `<@${event.user}> ${HOSHIDA_SAYINGS_COLLECTION[Math.floor(Math.random() * HOSHIDA_SAYINGS_COLLECTION.length)]}`;
+                    await slackWeb.chat.postMessage({
+                        channel: event.channel,
+                        text: text
+                    });
+
+                    // 二次受けにメッセージを投稿
+                    await slackWeb.chat.postMessage({
+                        channel: SECONDARY_CHANNEL,
+                        text: `<@${event.user}>から<#${event.channel}>へお問い合わせがありました。`,
+                        attachments: [
+                            {
+                                fallback: `<@${event.user}>から<#${event.channel}>へお問い合わせがありました。`,
+                                // pretext: '<@${event.user}>からお問い合わせがありました。',
+                                // title: '<@${event.user}>',
+                                // title_link: '',
+                                text: event.text,
+                                color: '#7CD197',
+                                // actions: [
+                                //     {
+                                //         'name': 'recommend',
+                                //         'text': 'Recommend',
+                                //         'type': 'button',
+                                //         'value': 'recommend',
+                                //         "confirm": {
+                                //             "title": "Are you sure?",
+                                //             "text": "Wouldn't you prefer a good game of chess?",
+                                //             "ok_text": "Yes",
+                                //             "dismiss_text": "No"
+                                //         }
+                                //     },
+                                //     {
+                                //         'name': 'no',
+                                //         'text': 'No',
+                                //         'type': 'button',
+                                //         'value': 'bad'
+                                //     }
+                                // ]
+                            }
+                        ]
+                    });
+
+                    break;
+                }
+
+            default:
+                break;
+        }
     }
 
     callback(null, {
