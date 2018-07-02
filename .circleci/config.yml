@@ -83,7 +83,7 @@ jobs:
             sudo npm i -g serverless
       - run:
           name: Deploy application
-          command: serverless deploy --force --stage dev -v
+          command: sudo serverless deploy --force --stage dev -v
   deploy:
     docker:
       - image: circleci/node:8.10
