@@ -1,6 +1,6 @@
 {
   "name": "ttts-slack-assistant",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "index.js",
   "directories": {
@@ -8,20 +8,19 @@
   },
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf ./dst ./docs ./coverage \"npm-debug.log*\" ./.nyc_output",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rimraf ./dst ./docs ./coverage \"npm-debug.log*\" ./.nyc_output ./.serverless",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "preversion": "npm run clean && npm run build && npm test",
+    "version": "git add -A",
+    "postversion": "git push origin --tags"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@slack/client": "^4.3.1",
-    "request": "^2.87.0",
-    "request-promise-native": "^1.0.5"
+    "@slack/client": "^4.3.1"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.7",
-    "@types/request": "^2.47.1",
-    "@types/request-promise-native": "^1.0.15",
     "rimraf": "^2.6.2",
     "typescript": "^2.9.2"
   }
