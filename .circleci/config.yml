@@ -82,7 +82,21 @@ jobs:
             sudo npm i -g serverless
       - run:
           name: Deploy application
-          command: serverless deploy --stage dev
+          command: serverless deploy --stage DEVELOPMENT
+  deploy:
+    docker:
+      - image: circleci/node:8.10
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: Install Serverless CLI
+          command: |
+            sudo npm i -g serverless
+      - run:
+          name: Deploy application
+          command: serverless deploy --stage PRODUCTION
 # Used for orchestrating all jobs.
 workflows:
   version: 2
@@ -102,9 +116,9 @@ workflows:
           filters:
             branches:
               only: develop
-      # - deploy:
-      #     requires:
-      #       - doc
-      #     filters:
-      #       branches:
-      #         only: master
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
