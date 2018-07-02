@@ -84,7 +84,7 @@ jobs:
       - run:
           name: Deploy application
           # command: serverless deploy --force --stage dev -v
-          command: serverless deploy
+          command: serverless deploy --stage dev
   deploy:
     docker:
       - image: circleci/node:8.10
