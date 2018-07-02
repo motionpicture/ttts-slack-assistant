@@ -82,7 +82,7 @@ jobs:
             sudo npm i -g serverless
       - run:
           name: Deploy application
-          command: serverless deploy --stage DEVELOPMENT
+          command: serverless deploy --force --stage DEVELOPMENT -v
   deploy:
     docker:
       - image: circleci/node:8.10
@@ -96,7 +96,7 @@ jobs:
             sudo npm i -g serverless
       - run:
           name: Deploy application
-          command: serverless deploy --stage PRODUCTION
+          command: serverless deploy --force --stage PRODUCTION -v
 # Used for orchestrating all jobs.
 workflows:
   version: 2
