@@ -78,13 +78,16 @@ jobs:
       - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
       - run:
+          name: compile typescript
+          command: |
+            npm run build
+      - run:
           name: Install Serverless CLI
           command: |
             sudo npm i -g serverless
       - run:
           name: Deploy application
-          # command: serverless deploy --force --stage dev -v
-          command: serverless deploy --stage dev
+          command: serverless deploy --force --stage dev -v
   deploy:
     docker:
       - image: circleci/node:8.10
@@ -93,12 +96,16 @@ jobs:
       - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
       - run:
+          name: compile typescript
+          command: |
+            npm run build
+      - run:
           name: Install Serverless CLI
           command: |
             sudo npm i -g serverless
       - run:
           name: Deploy application
-          command: serverless deploy --force --stage PRODUCTION -v
+          command: serverless deploy --force --stage prod -v
 # Used for orchestrating all jobs.
 workflows:
   version: 2
